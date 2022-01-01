@@ -2,7 +2,9 @@ import React from "react";
 import Table from "../Component/Common/Table";
 import {userList} from "../Redux/actions/userList";
 import {connect} from "react-redux";
-import ReactPaginate from 'react-paginate';
+import Pagination from "react-js-pagination";
+import "bootstrap3/less/bootstrap.less"
+import { getAllUserDetails } from "../utils/services/user";
 class User extends React.Component{
     constructor() {
         super();
@@ -10,50 +12,33 @@ class User extends React.Component{
         userList:[],
         totalRecords:[],
         searchData:"",
-        offset: 0,
-        data: [],
-        perPage: 5,
-        currentPage: 0,
-        totalPage : 0
+        loading:false,
+        activePage:1,
+        perPage:2,
+        totalItem:0
+
+
     }
     }
-    handlePageClick = (e) => {
-        const selectedPage = e.selected;
-        const offset = selectedPage * this.state.perPage;
-
-        this.setState({
-            currentPage: selectedPage,
-            offset: offset
-        }, () => {
-            
-        });
-
-    };
-    componentDidMount()
-    {   const {perPage} = this.state;
-        const {userList} = this.props;
-       let totalPage= (10/perPage)
-       if(/[\.]/.test(String(totalPage)))
+   componentDidMount()
+   {
+       this.getAllUser()
+   }
+  getAllUser =() =>{
+      this.setState({loading:true})
+    getAllUserDetails().then(res=>{
+       if(res.data.resStatus==="Success")
        {
-           totalPage = parseInt(totalPage)+1
-       }
-      
-       this.setState({totalPage:totalPage})
-    }
-   fetchUserData=()=>{
-       const {fetchUserData}=this.props;
-       fetchUserData();
-   }
-   componentDidUpdate(prevProps, prevState, snapshot) {
-
-        if(this.props.userList.length>0&&prevState.userList.length==0)
-        {
-            this.setState({
-                userList:this.props.userList,
-                totalRecords:this.props.userList
+           this.setState({
+               userList:res.data.resData,
+               loading:false,
+               totalItem:res.data.resData.length
             })
-        }
-   }
+       }
+    })
+  }
+
+ 
  onSearch = (e) =>{
  const {value} = e.target;
  const {userList,totalRecords}= this.state;
@@ -63,25 +48,26 @@ class User extends React.Component{
      return res;
      }
  })
- this.setState({userList:newData});
+ this.setState({userList:newData,});
+ }
+ handlePagination=(pageNo)=>{
+  this.setState({activePage:pageNo})
  }
     render() {
-      const {userList,searchData} =this.state;
+      const {userList,searchData,loading, activePage,totalItem,perPage} =this.state;
         return (
             <>
-                <button onClick={this.fetchUserData}>Fetch User Data</button>
+              {loading&&<h1>Loading...</h1>}
                 <br/>
                 <input value={searchData} className="form-control" type="text" onChange={this.onSearch} />
-             <Table userList={userList}/>
-             <ReactPaginate
-        breakLabel="..."
-        nextLabel="next >"
-        onPageChange={this.handlePageClick}
-        pageRangeDisplayed={2}
-        pageCount={10}
-        previousLabel="< previous"
-        renderOnZeroPageCount={null}
-      />
+             <Table userList={userList} activePage={activePage} perPage={perPage}/>
+                {/* <Pagination
+                    activePage={activePage}
+                    itemsCountPerPage={perPage}
+                    totalItemsCount={totalItem}
+                   // pageRangeDisplayed={10}
+                    onChange={this.handlePagination}
+                /> */}
             </>
         );
     }

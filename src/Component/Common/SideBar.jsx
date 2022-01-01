@@ -28,6 +28,12 @@ class SideBar extends  React.Component{
                         <i className="fas fa-fw fa-tachometer-alt"></i>
                         <span>Login</span></Link>
                 </li>
+                <li className="nav-item active">
+                    <Link to="/user-function-component" className="nav-link" href="index.html">
+                        <i className="fas fa-fw fa-tachometer-alt"></i>
+                        <span>User Function Component</span>
+                    </Link>
+                </li>
 
 
                 <hr class="sidebar-divider"/>
